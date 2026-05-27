@@ -1,0 +1,38 @@
+apiVersion: gateway.networking.k8s.io/v1
+kind: HTTPRoute
+metadata:
+  name: apim-route
+  namespace: wso2-cp
+spec:
+  parentRefs:
+    - name: wso2-gateway
+      namespace: envoy-gateway-system
+      sectionName: https
+  hostnames:
+    - "apim.example.com"
+  rules:
+    - matches:
+        - path:
+            type: PathPrefix
+            value: /
+      backendRefs:
+        - name: apim-wso2am-acp-service
+          port: 9443
+---
+apiVersion: gateway.networking.k8s.io/v1
+kind: BackendTLSPolicy
+metadata:
+  name: wso2-backend-tls
+  namespace: wso2-cp
+spec:
+  targetRefs:
+    - group: ""
+      kind: Service
+      name: apim-wso2am-acp-service
+  validation:
+    hostname: "localhost"
+    caCertificateRefs:
+      - group: ""
+        kind: ConfigMap
+        name: wso2-ca-cert
+
