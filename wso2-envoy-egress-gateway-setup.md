@@ -32,7 +32,8 @@ Install Envoy Gateway using Helm:
 helm install eg oci://docker.io/envoyproxy/gateway-helm \
   --version v1.8.0 \
   -n envoy-gateway-system \
-  --create-namespace
+  --create-namespace \
+  --set envoyGateway.extensionApis.enableBackend=true
 ```
 
 Verify the installation:
@@ -146,25 +147,24 @@ spec:
             type: PathPrefix
             value: /
       backendRefs:
-        - name: apim-wso2am-acp-service
-          port: 9443
+      - group: gateway.envoyproxy.io
+        kind: Backend
+        name: apim-backend
+        port: 9443
 ---
-apiVersion: gateway.networking.k8s.io/v1
-kind: BackendTLSPolicy
+apiVersion: gateway.envoyproxy.io/v1alpha1
+kind: Backend
 metadata:
-  name: wso2-backend-tls
+  name: apim-backend
   namespace: wso2-cp
 spec:
-  targetRefs:
-    - group: ""
-      kind: Service
-      name: apim-wso2am-acp-service
-  validation:
-    hostname: "localhost"
-    caCertificateRefs:
-      - group: ""
-        kind: ConfigMap
-        name: wso2-ca-cert
+  type: Endpoints
+  endpoints:
+  - fqdn:
+      hostname: apim-wso2am-acp-service.wso2-cp.svc.cluster.local
+      port: 9443
+  tls:
+    insecureSkipVerify: true
 ---
 apiVersion: gateway.networking.k8s.io/v1
 kind: HTTPRoute
@@ -184,25 +184,24 @@ spec:
             type: PathPrefix
             value: /
       backendRefs:
-        - name: apim-gw-wso2am-universal-gw-service
-          port: 8243
+      - group: gateway.envoyproxy.io
+        kind: Backend
+        name: internal-gw-backend
+        port: 8243
 ---
-apiVersion: gateway.networking.k8s.io/v1
-kind: BackendTLSPolicy
+apiVersion: gateway.envoyproxy.io/v1alpha1
+kind: Backend
 metadata:
-  name: internal-gw-backend-tls
+  name: internal-gw-backend
   namespace: wso2-internal-gw
 spec:
-  targetRefs:
-    - group: ""
-      kind: Service
-      name: apim-gw-wso2am-universal-gw-service
-  validation:
-    hostname: "localhost"
-    caCertificateRefs:
-      - group: ""
-        kind: ConfigMap
-        name: wso2-ca-cert
+  type: Endpoints
+  endpoints:
+  - fqdn:
+      hostname: apim-gw-wso2am-universal-gw-service.wso2-internal-gw.svc.cluster.local
+      port: 8243
+  tls:
+    insecureSkipVerify: true
 ---
 apiVersion: gateway.networking.k8s.io/v1
 kind: HTTPRoute
@@ -222,25 +221,24 @@ spec:
             type: PathPrefix
             value: /
       backendRefs:
-        - name: apim-gw-wso2am-universal-gw-service
-          port: 8243
+      - group: gateway.envoyproxy.io
+        kind: Backend
+        name: external-gw-backend
+        port: 8243
 ---
-apiVersion: gateway.networking.k8s.io/v1
-kind: BackendTLSPolicy
+apiVersion: gateway.envoyproxy.io/v1alpha1
+kind: Backend
 metadata:
-  name: external-gw-backend-tls
+  name: external-gw-backend
   namespace: wso2-external-gw
 spec:
-  targetRefs:
-    - group: ""
-      kind: Service
-      name: apim-gw-wso2am-universal-gw-service
-  validation:
-    hostname: "localhost"
-    caCertificateRefs:
-      - group: ""
-        kind: ConfigMap
-        name: wso2-ca-cert
+  type: Endpoints
+  endpoints:
+  - fqdn:
+      hostname: apim-gw-wso2am-universal-gw-service.wso2-external-gw.svc.cluster.local
+      port: 8243
+  tls:
+    insecureSkipVerify: true
 ```
 
 Apply the unified data configurations:
@@ -262,14 +260,6 @@ kubectl create secret tls wso2-ingress-cert \
   --namespace envoy-gateway-system \
   --cert=/path/to/your/tls.crt \
   --key=/path/to/your/tls.key
-```
-
-Create the CA Certificate ConfigMap for internal gateway:
-
-```bash
-kubectl create configmap wso2-ca-cert -n wso2-cp --from-file=ca.crt=wso2-actual.crt
-kubectl create configmap wso2-ca-cert -n wso2-internal-gw --from-file=ca.crt=wso2-actual.crt
-kubectl create configmap wso2-ca-cert -n wso2-external-gw --from-file=ca.crt=wso2-actual.crt
 ```
 
 ---
@@ -303,10 +293,5 @@ kubectl describe httproute -n wso2-external-gw
 
 # Check Envoy Gateway pods
 kubectl get pods -n envoy-gateway-system
-
-# Check configmap creation
-kubectl get configmap wso2-ca-cert -n wso2-cp
-kubectl get configmap wso2-ca-cert -n wso2-internal-gw
-kubectl get configmap wso2-ca-cert -n wso2-external-gw
 ```
 

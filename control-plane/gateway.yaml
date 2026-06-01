@@ -16,23 +16,22 @@ spec:
             type: PathPrefix
             value: /
       backendRefs:
-        - name: apim-wso2am-acp-service
-          port: 9443
+      - group: gateway.envoyproxy.io
+        kind: Backend
+        name: apim-backend
+        port: 9443
 ---
-apiVersion: gateway.networking.k8s.io/v1
-kind: BackendTLSPolicy
+apiVersion: gateway.envoyproxy.io/v1alpha1
+kind: Backend
 metadata:
-  name: wso2-backend-tls
+  name: apim-backend
   namespace: wso2-cp
 spec:
-  targetRefs:
-    - group: ""
-      kind: Service
-      name: apim-wso2am-acp-service
-  validation:
-    hostname: "localhost"
-    caCertificateRefs:
-      - group: ""
-        kind: ConfigMap
-        name: wso2-ca-cert
+  type: Endpoints
+  endpoints:
+  - fqdn:
+      hostname: apim-wso2am-acp-service.wso2-cp.svc.cluster.local
+      port: 9443
+  tls:
+    insecureSkipVerify: true
 
