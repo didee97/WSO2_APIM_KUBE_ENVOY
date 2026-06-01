@@ -43,7 +43,7 @@ spec:
               fieldPath: status.podIP
         - name: JVM_MEM_OPTS
           value: -Xms2048m -Xmx2048m
-        image: docker.io/bimdevops/wso2-apim-acp-mysql@sha256:7ff3df14bfc8e80782a756a9a8a001542e1872a5cdb418389081db0214a65333
+        image: docker.io/bimdevops/wso2-apim-acp-mysql@sha256:3bbb485221ad5a91b399a41eb401e62b9df691809fb89e7fa735e03a2dd509d2
         imagePullPolicy: IfNotPresent
         lifecycle:
           preStop:

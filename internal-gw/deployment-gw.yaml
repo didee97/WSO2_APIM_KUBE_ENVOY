@@ -43,7 +43,7 @@ spec:
         restartPolicy: Always
         volumeMounts:
         - name: shared-logs
-          mountPath: /home/wso2carbon/wso2am-universal-gw-4.6.0/repository/logs/
+          mountPath: /home/wso2carbon/wso2am-universal-gw-4.7.0/repository/logs/
         - name: filebeat-config
           mountPath: /etc/filebeat/
       containers:
@@ -57,7 +57,7 @@ spec:
               fieldPath: status.podIP
         - name: JVM_MEM_OPTS
           value: -Xms2048m -Xmx2048m
-        image: docker.io/bimdevops/wso2-apim-gw-mysql@sha256:4c784045a2acab29759f5e2d662e146d8697b7834658a78c4f8f7215846f0d9a
+        image: docker.io/bimdevops/wso2-apim-gw-mysql@sha256:b62e00c8c3e4def710f8e8aa63010b4e6b8b37300eecebca38c44c2045044399
         imagePullPolicy: IfNotPresent
         lifecycle:
           preStop:
@@ -137,7 +137,7 @@ spec:
           name: wso2am-gateway-conf
           subPath: deployment.toml
         - name: shared-logs
-          mountPath: /home/wso2carbon/wso2am-universal-gw-4.6.0/repository/logs/
+          mountPath: /home/wso2carbon/wso2am-universal-gw-4.7.0/repository/logs/
       dnsPolicy: ClusterFirst
       restartPolicy: Always
       schedulerName: default-scheduler
