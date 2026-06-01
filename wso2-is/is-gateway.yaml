@@ -1,0 +1,37 @@
+apiVersion: gateway.networking.k8s.io/v1
+kind: HTTPRoute
+metadata:
+  name: is-route
+  namespace: wso2-is
+spec:
+  parentRefs:
+    - name: wso2-gateway
+      namespace: envoy-gateway-system
+      sectionName: https
+  hostnames:
+    - "wso2is.example.com"
+  rules:
+    - matches:
+        - path:
+            type: PathPrefix
+            value: /
+      backendRefs:
+      - group: gateway.envoyproxy.io     # Change group from "" to Envoy's CRD group
+        kind: Backend                    # Change kind from "Service" to "Backend"
+        name: wso2-is-backend            # Target the Backend object we created in Step 1
+        port: 9443
+---
+apiVersion: gateway.envoyproxy.io/v1alpha1
+kind: Backend
+metadata:
+  name: wso2-is-backend
+  namespace: wso2-is
+spec:
+  type: Endpoints
+  endpoints:
+  - fqdn:
+      # Point to the internal K8s service name + namespace + cluster domain suffix
+      hostname: wso2-is-identity-server.wso2-is.svc.cluster.local
+      port: 9443
+  tls:
+    insecureSkipVerify: true

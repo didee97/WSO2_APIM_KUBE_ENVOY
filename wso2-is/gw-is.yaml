@@ -1,0 +1,33 @@
+apiVersion: v1
+kind: Service
+metadata:
+  annotations:
+    meta.helm.sh/release-name: wso2-is
+    meta.helm.sh/release-namespace: wso2-is
+  creationTimestamp: "2026-06-01T10:52:26Z"
+  labels:
+    app.kubernetes.io/managed-by: Helm
+  name: wso2-is-identity-server
+  namespace: wso2-is
+  resourceVersion: "2146069"
+  uid: 4bbe81ac-8ec0-4afc-82b2-3c8e43533fd8
+spec:
+  clusterIP: 10.108.243.247
+  clusterIPs:
+  - 10.108.243.247
+  internalTrafficPolicy: Cluster
+  ipFamilies:
+  - IPv4
+  ipFamilyPolicy: SingleStack
+  ports:
+  - name: servlet-https
+    port: 9443
+    protocol: TCP
+    targetPort: 9443
+  selector:
+    app.kubernetes.io/instance: wso2-is
+    app.kubernetes.io/name: identity-server
+  sessionAffinity: None
+  type: ClusterIP
+status:
+  loadBalancer: {}
